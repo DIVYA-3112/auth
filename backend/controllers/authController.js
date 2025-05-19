@@ -68,5 +68,16 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = {registerUser, loginUser};
+const allUsers = async (req,res) => {
+    try {
+        const users = await User.find();
+        return res.status(200).json(users);
+    }
+    catch (err) {
+        console.error("error in showing all user ", err);
+        return res.status(502).json({message : "error in showing all user"});
+    }
+}
+
+module.exports = {registerUser, loginUser, allUsers};
 
