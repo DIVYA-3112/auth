@@ -79,5 +79,9 @@ const allUsers = async (req,res) => {
     }
 }
 
-module.exports = {registerUser, loginUser, allUsers};
+const logout = (req, res) => {
+    return res.status(200).json({message : "Dummy logout succesfull"});
+}
+
+module.exports = {registerUser, loginUser, allUsers, logout};
 
