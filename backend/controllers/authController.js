@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const {sendVerificationEmail} = require("../utils/mailer");
 
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -22,6 +23,9 @@ const registerUser = async (req, res) => {
 
         // create and save user (password automatically hashed)
         const user = await User.create({ name, email, password });
+        const token = jwt.sign(email, process.env.JWT_SECRET_KEY);
+
+        sendVerificationEmail(email, token);
 
         // respond
         return res.status(201).json({
@@ -37,6 +41,16 @@ const registerUser = async (req, res) => {
         return res.status(500).json({ message: "server error" });
     }
 };
+
+const verifyEmail = async (req, res) => {
+    if(req.header && req.header.token) {
+        const token = req.header.token;
+        const isValid = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const user = await User.findOne({isValid});
+        user.verified = true;
+        await user.save();
+    }
+} 
 
 const loginUser = async (req, res) => {
     const {email, password} = req.body;
@@ -83,5 +97,21 @@ const logout = (req, res) => {
     return res.status(200).json({message : "Dummy logout succesfull"});
 }
 
-module.exports = {registerUser, loginUser, allUsers, logout};
+const deleteByEmail = async (req, res) => {
+    console.log(req.params.id);
+    const email = req.params.id;
+    const isValid = await User.findOne({email});
+    if(!isValid) {
+        return res.status(401).json({message : `User with email : ${email}, not found`});
+    }
+    const user = await User.deleteOne({email});
+    if(user.deletedCount === 1) {
+        return res.status(200).json({message : `User with email : ${email}, deleted successfully`});
+    }
+    else {
+        return res.status(400).json({message : "error in deleting user"});
+    }
+}
+
+module.exports = {registerUser, loginUser, allUsers, logout, verifyEmail, deleteByEmail};
 
