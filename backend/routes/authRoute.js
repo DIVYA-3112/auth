@@ -10,7 +10,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/allusers", allUsers);
 router.get("/logout", logout);
-router.get("/verify-email", verifyEmail);
+router.get("/email-verify", verifyEmail);
 router.delete("/delete/:id", deleteByEmail);
 
 module.exports = router;

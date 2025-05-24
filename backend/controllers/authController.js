@@ -43,13 +43,15 @@ const registerUser = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
-    if(req.header && req.header.token) {
-        const token = req.header.token;
+        
+        const token = req.query.token;
+        console.log(token);
         const isValid = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        const user = await User.findOne({isValid});
+        const user = await User.findOne({email : isValid});
         user.verified = true;
         await user.save();
-    }
+        console.log("Email verifiation success");
+        return res.json({Message : "Email verification successful"});
 } 
 
 const loginUser = async (req, res) => {
